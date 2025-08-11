@@ -1,30 +1,34 @@
 USE LibraryDB;
-SELECT B.Title, B.Genre, A.Name AS AuthorName
+SELECT COUNT(*) AS TotalBooks
+FROM Books;
+SELECT Genre, COUNT(*) AS TotalBooks
+FROM Books
+GROUP BY Genre;
+SELECT A.Name AS AuthorName, AVG(B.PublishedYear) AS AvgYear
 FROM Books B
-INNER JOIN Authors A ON B.AuthorID = A.AuthorID;
-SELECT B.Title, BR.BorrowDate, BR.ReturnDate
+JOIN Authors A ON B.AuthorID = A.AuthorID
+GROUP BY A.Name;
+SELECT YEAR(MembershipDate) AS JoinYear, COUNT(*) AS TotalMembers
+FROM Members
+GROUP BY YEAR(MembershipDate);
+SELECT A.Name AS AuthorName, COUNT(*) AS BookCount
 FROM Books B
-LEFT JOIN Borrow BR ON B.BookID = BR.BookID;
-SELECT BR.BorrowID, B.Title, BR.BorrowDate
+JOIN Authors A ON B.AuthorID = A.AuthorID
+GROUP BY A.Name
+HAVING COUNT(*) > 1;
+SELECT AVG(DATEDIFF(ReturnDate, BorrowDate)) AS AvgBorrowDays
+FROM Borrow
+WHERE ReturnDate IS NOT NULL;
+SELECT M.Name AS MemberName, COUNT(*) AS BorrowCount
 FROM Borrow BR
-RIGHT JOIN Books B ON BR.BookID = B.BookID;
-SELECT M.MemberID, M.Name, BR.BorrowID, BR.BorrowDate
-FROM Members M
-LEFT JOIN Borrow BR ON M.MemberID = BR.MemberID
-UNION
-SELECT M.MemberID, M.Name, BR.BorrowID, BR.BorrowDate
-FROM Members M
-RIGHT JOIN Borrow BR ON M.MemberID = BR.MemberID;
-SELECT BR.BorrowID, B.Title, M.Name AS MemberName, BR.BorrowDate, BR.ReturnDate
+JOIN Members M ON BR.MemberID = M.MemberID
+GROUP BY M.Name;
+SELECT A.Name AS AuthorName, COUNT(*) AS TotalBorrowed
 FROM Borrow BR
-INNER JOIN Books B ON BR.BookID = B.BookID
-INNER JOIN Members M ON BR.MemberID = M.MemberID;
-SELECT A.Name AS AuthorName, B.Title
-FROM Authors A
-LEFT JOIN Books B ON A.AuthorID = B.AuthorID;
-SELECT S.Name AS StaffName, BR.BorrowID
-FROM Staff S
-RIGHT JOIN Borrow BR ON S.StaffID = BR.BorrowID; -- Just a sample, not an actual relationship
-SELECT A.Name AS AuthorName, B.Genre
-FROM Authors A
-CROSS JOIN (SELECT DISTINCT Genre FROM Books) B;
+JOIN Books B ON BR.BookID = B.BookID
+JOIN Authors A ON B.AuthorID = A.AuthorID
+GROUP BY A.Name;
+SELECT ROUND(AVG(PublishedYear), 0) AS RoundedAvgYear
+FROM Books;
+SELECT COUNT(DISTINCT Genre) AS UniqueGenres
+FROM Books;
